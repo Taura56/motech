@@ -23,7 +23,7 @@ function publicPaymentResult(payment, publicToken, message = 'Payment request is
   };
 }
 
-export async function initiatePayment({ phone, packageId, idempotencyKey }) {
+export async function initiatePayment({ phone, packageId, idempotencyKey, routerContext = {} }) {
   const packageInfo = await Package.findOne({ _id: packageId, enabled: true }).lean();
   if (!packageInfo) throw new AppError(404, 'PACKAGE_NOT_FOUND', 'This package is not available.');
   const phoneNumber = normalizeKenyanPhone(phone);
@@ -37,6 +37,10 @@ export async function initiatePayment({ phone, packageId, idempotencyKey }) {
     encryptedPublicToken: encryptSecret(publicToken),
     idempotencyKey,
     phoneNumber,
+    routerContext: {
+      macAddress: routerContext.macAddress || '',
+      ipAddress: routerContext.ipAddress || ''
+    },
     packageId: packageInfo._id,
     packageSnapshot: {
       name: packageInfo.name,
@@ -211,6 +215,8 @@ async function createAccessForPayment(payment) {
     const access = await AccessSession.create({
       paymentId: payment._id,
       phoneNumber: payment.phoneNumber,
+      macAddress: payment.routerContext?.macAddress || '',
+      ipAddress: payment.routerContext?.ipAddress || '',
       username,
       encryptedPassword: encryptSecret(password),
       startsAt,
