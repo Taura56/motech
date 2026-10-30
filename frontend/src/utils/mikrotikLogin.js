@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'motech:router-context';
-const ALLOWED_HOST = 'login.motechzone.local';
+const ALLOWED_HOSTS = new Set(['login.motechzone.local', '192.168.10.1']);
 
 export function captureRouterContext() {
   const params = new URLSearchParams(window.location.search);
@@ -14,7 +14,7 @@ export function captureRouterContext() {
   if (context.loginUrl) {
     try {
       const url = new URL(context.loginUrl, window.location.origin);
-      if (url.protocol !== 'http:' || url.hostname !== ALLOWED_HOST) context.loginUrl = '';
+      if (url.protocol !== 'http:' || !ALLOWED_HOSTS.has(url.hostname)) context.loginUrl = '';
       else context.loginUrl = url.href;
     } catch { context.loginUrl = ''; }
   }
