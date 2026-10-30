@@ -19,7 +19,7 @@ export function captureRouterContext() {
     } catch { context.loginUrl = ''; }
   }
   if (context.macAddress && !/^(?:[0-9a-f]{2}:){5}[0-9a-f]{2}$/i.test(context.macAddress)) context.macAddress = '';
-  if (context.ipAddress && !/^(?:(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)$/.test(context.ipAddress)) context.ipAddress = '';
+  if (context.ipAddress && !/^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/.test(context.ipAddress)) context.ipAddress = '';
   if (context.loginUrl && context.chapId && context.chapChallenge) {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(context));
   }
