@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Connecting to MOTECH ZONE</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#071a35;color:#fff;min-height:100vh;display:grid;place-items:center;margin:0}
+    main{max-width:420px;margin:24px;padding:30px;border-radius:18px;background:#10294b;text-align:center;box-shadow:0 12px 36px #0005}
+    p{color:#d7e5f7;line-height:1.6}a{color:#8dc5ff}
+  </style>
+</head>
+<body>
+  <main>
+    <h2>MOTECH ZONE</h2>
+    <p id="message">Opening the secure Wi-Fi portal. Please wait…</p>
+    <p><a id="manual" href="https://motech-zone-portal-2026.onrender.com/">Open the portal manually</a></p>
+  </main>
+  <script>
+    (function () {
+      var portal = 'https://motech-zone-portal-2026.onrender.com/';
+      var params = new URLSearchParams();
+      params.set('mac', '$(mac)');
+      params.set('ip', '$(ip)');
+      params.set('link-login-only', '$(link-login-only)');
+      params.set('link-orig', '$(link-orig)');
+      params.set('chap-id', '$(chap-id)');
+      params.set('chap-challenge', '$(chap-challenge)');
+      var target = portal + '?' + params.toString();
+      document.getElementById('manual').href = target;
+      window.location.replace(target);
+    }());
+  </script>
+</body>
+</html>
