@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { api, downloadPaymentsCsv, paymentHeaders } from './api.js';
 import { createIdempotencyKey } from './utils/idempotencyKey.js';
+import { captureRouterContext, getRouterContext, submitHotspotLogin } from './utils/mikrotikLogin.js';
 
 function Header() {
   return <header className="topbar"><Link className="brand" to="/">MOTECH <span>ZONE</span></Link><nav><Link to="/terms">Terms & privacy</Link></nav></header>;
@@ -18,6 +19,7 @@ function CustomerPortal() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [clockNow, setClockNow] = useState(Date.now());
+  const [routerContext] = useState(() => captureRouterContext());
 
   useEffect(() => {
     api('/packages').then((data) => {
@@ -57,6 +59,12 @@ function CustomerPortal() {
   }, [payment, status?.status, status?.access?.status]);
 
   useEffect(() => {
+    if (status?.access?.status !== 'ACTIVE' || !status.access.username || !status.access.password || !payment?.orderId) return;
+    try { submitHotspotLogin(status.access.username, status.access.password, payment.orderId); }
+    catch { /* Manual credentials remain available if automatic login fails. */ }
+  }, [status?.access?.status, status?.access?.username, status?.access?.password, payment?.orderId]);
+
+  useEffect(() => {
     if (!status?.access?.expiresAt) return undefined;
     const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
@@ -72,7 +80,7 @@ function CustomerPortal() {
       sessionStorage.setItem(storageKey, idempotencyKey);
       const result = await api('/payments/initiate', {
         method: 'POST',
-        body: JSON.stringify({ phone, packageId: selected._id, idempotencyKey })
+        body: JSON.stringify({ phone, packageId: selected._id, idempotencyKey, routerContext: { macAddress: routerContext.macAddress, ipAddress: routerContext.ipAddress } })
       });
       sessionStorage.setItem('motech:active-payment-token', result.paymentToken);
       setPayment(result);
@@ -101,6 +109,8 @@ function CustomerPortal() {
   }
 
   const access = status?.access;
+  const routerLogin = getRouterContext();
+  const hasRouterLogin = Boolean(routerLogin.loginUrl && routerLogin.chapId && routerLogin.chapChallenge);
   const paymentIsTerminal = ['FAILED', 'CANCELLED', 'EXPIRED'].includes(status?.status);
   const remainingSeconds = access?.expiresAt
     ? Math.max(0, Math.ceil((new Date(access.expiresAt).getTime() - clockNow) / 1000))
@@ -131,7 +141,8 @@ function CustomerPortal() {
       {status?.failureMessage && <p className={status.status === 'REVIEW_REQUIRED' ? 'helper' : 'notice error'}>{status.failureMessage}</p>}
       {access?.status === 'ACTIVE' && access.username && <div className="credentials"><span>Hotspot username</span><strong>{access.username}</strong><span>Hotspot password</span><strong>{access.password}</strong></div>}
       {access?.logoutAvailable && <button className="button secondary wide" onClick={logoutAccess} disabled={busy}>{busy ? 'Logging out…' : 'Log out of Wi-Fi'}</button>}
-      {access?.status === 'ACTIVE' && <a className="text-button" href="http://login.motechzone.local/login?motech-login=1">Return to Wi-Fi login</a>}
+      {access?.status === 'ACTIVE' && <p className="helper">{hasRouterLogin ? 'Connecting your device to Wi-Fi… If it does not connect automatically, use the credentials above on the Wi-Fi login page.' : 'Open the Wi-Fi login page and enter the hotspot credentials above to connect.'}</p>}
+      {access?.status === 'ACTIVE' && <a className="text-button" href="http://login.motechzone.local/login?motech-login=1">Open Wi-Fi login</a>}
       {paymentIsTerminal && status?.status !== 'REVIEW_REQUIRED' && <button className="button secondary wide" onClick={reset}>Start another purchase</button>}
       {status?.status === 'SUCCESS' && ['ACTIVE', 'EXPIRED'].includes(access?.status) && <button className="button secondary wide" onClick={reset}>Buy another package</button>}
     </section> : selected ? <section className="panel">
