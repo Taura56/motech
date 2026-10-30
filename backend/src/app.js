@@ -41,7 +41,7 @@ export function createApp({ sessionStore } = {}) {
     store: sessionStore || MongoStore.create({ mongoUrl: config.MONGODB_URI, collectionName: 'admin_sessions', ttl: 60 * 60 * 8 }),
     cookie: {
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       secure: config.sessionCookieSecure,
       maxAge: 1000 * 60 * 60 * 8
     }
