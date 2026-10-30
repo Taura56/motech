@@ -13,7 +13,11 @@ export const publicRoutes = Router();
 const initiateSchema = z.object({
   phone: z.string().min(8).max(20),
   packageId: z.string().regex(/^[a-f\d]{24}$/i),
-  idempotencyKey: z.string().uuid()
+  idempotencyKey: z.string().uuid(),
+  routerContext: z.object({
+    macAddress: z.string().regex(/^(?:[0-9a-f]{2}:){5}[0-9a-f]{2}$/i).optional(),
+    ipAddress: z.string().ip().optional()
+  }).optional()
 });
 const initiateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
