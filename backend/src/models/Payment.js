@@ -15,6 +15,10 @@ const paymentSchema = new mongoose.Schema({
   encryptedPublicToken: { type: String, required: true, select: false },
   idempotencyKey: { type: String, default: undefined },
   phoneNumber: { type: String, required: true, index: true },
+  routerContext: {
+    macAddress: { type: String, default: '' },
+    ipAddress: { type: String, default: '' }
+  },
   packageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Package', required: true },
   packageSnapshot: { type: packageSnapshotSchema, required: true },
   amountKes: { type: Number, required: true },
