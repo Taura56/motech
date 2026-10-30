@@ -78,9 +78,9 @@ export function validateEnvironment(environment = process.env) {
   if (value.DARAJA_SHORTCODE && !/^\d{5,6}$/.test(value.DARAJA_SHORTCODE)) {
     throw new Error('MPESA_SHORTCODE must contain 5 or 6 digits');
   }
-  // if (value.NODE_ENV === 'production' && value.DARAJA_ENV !== 'production') {
-  //   throw new Error('Production deployment must explicitly set MPESA_ENVIRONMENT=production');
-  // }
+  if (value.NODE_ENV === 'production' && value.DARAJA_ENV !== 'production') {
+    throw new Error('Production deployment must explicitly set MPESA_ENVIRONMENT=production');
+  }
   if (value.NODE_ENV === 'production') {
     if (!value.DARAJA_CALLBACK_URL || value.PUBLIC_BACKEND_URL.startsWith('http://')) {
       throw new Error('Production callback and backend URLs must use HTTPS');
