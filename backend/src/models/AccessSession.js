@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 const accessSessionSchema = new mongoose.Schema({
   paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment', required: true, unique: true },
   phoneNumber: { type: String, required: true, index: true },
+  macAddress: { type: String, default: '', index: true },
+  ipAddress: { type: String, default: '' },
   username: { type: String, required: true, unique: true },
   encryptedPassword: { type: String, required: true, select: false },
   startsAt: { type: Date, required: true },
